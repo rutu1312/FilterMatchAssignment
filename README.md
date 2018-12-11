@@ -25,7 +25,7 @@ If the path contains spaces, use the shortened path name. For example, C:\Progra
 8.	Add  JAVA_Home or JRE_HOME to path variable in user variable.
 
 To start the tomcat server traverse to bin folder of tomcat(e.g D:\apache-tomcat-7.0.92-windows-x64\apache-tomcat-7.0.92\bin) in command prompt and run startup.bat 
-The server is up and running (ensure it but hitting http://localhost:8080 in your browser and the home pages of apache tomcat lunches)
+The server is up and running (ensure it by hitting http://localhost:8080 in your browser and the home pages of apache tomcat lunches)
 To start the application hit url http://localhost:8080/FilteringMatches/Home.html in your browser and the application lunches
 
 Working of application:
