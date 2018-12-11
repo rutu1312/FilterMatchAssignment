@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<body>
+
+<script>
+var app = angular.module("customerList", []); 
+app.controller("filterCtrl", function($scope, $http) {
+
+	 $http.get("http://localhost:8080/FilteringMatches/SparkNetworks/PersonMatchService/matchs")
+	  .then(function(response) {
+		  $scope.customerData = response.data;
+		  $scope.loggedInUser = $scope.customerData.matches[0];
+		  
+	  });
+  
+	
+	
+	$scope.hasPhoto = true;
+	$scope.filterArray = [];
+	
+  $scope.distance = "";
+  
+    $scope.ResetValue =function(){
+	    $scope.hasPhoto="";
+		$scope.InContact="";
+		$scope.InFavourite="";
+		$scope.distance="";
+		$scope.filterModelMin.age =undefined;
+		$scope.filterModelMax.age =undefined;
+		$scope.filterHeightMin.height_in_cm =undefined;
+		$scope.filterHeightMax.height_in_cm =undefined;
+		$scope.filterCompatibilityMin.compatibility_score =undefined;
+		$scope.filterCompatibilityMax.compatibility_score =undefined;
+	}
+	
+	$scope.byRange = function (fieldName, minValue, maxValue) {
+	  if (minValue === undefined || minValue === null) minValue = 18;
+	  if (maxValue === undefined || maxValue === null) maxValue = 95;
+
+	  return function predicateFunc(item) {
+		return minValue <= item[fieldName] && item[fieldName] <= maxValue;
+	  };
+	};
+	
+	$scope.byHeightRange = function (fieldName, minValue, maxValue) {
+	  if (minValue === undefined || minValue === null) minValue = 135;
+	  if (maxValue === undefined || maxValue === null) maxValue = 210;
+
+	  return function predicateFunc(item) {
+		return minValue <= item[fieldName] && item[fieldName] <= maxValue;
+	  };
+	};
+	
+	$scope.byHasPhoto = function (isHasPhotoChecked) {
+		return function predicateFunc(item){
+		if(isHasPhotoChecked === ''){
+			return item;
+		} else {
+			if(isHasPhotoChecked){
+				return (item.mainPhoto !== undefined && item.mainPhoto.length > 0);
+			} else if(isHasPhotoChecked == false) {
+				return (item.mainPhoto == undefined || item.mainPhoto.length == 0);
+			}
+		}
+		};
+	};
+	
+	$scope.byContactExachange = function (isContact) {
+		return function predicateFunc(item){
+		if(isContact === ''){
+			return item;
+		} else {
+			if(isContact){
+				return (item.contactsExchanged > 0);
+			} else if(isContact == false) {
+				return (item.contactsExchanged == 0);
+			}
+		}
+		};
+	}
+	
+	$scope.byFavorite = function (isfavorite) {
+		return function predicateFunc(item){
+		if(isfavorite === ''){
+			return item;
+		} else {
+			if(isfavorite){
+				return (item.favourite == true);
+			} else {
+				return (item.contactsExchanged == false);
+			}
+		}
+		};
+	}
+	
+	$scope.byCompatibilityRange = function (fieldName, minValue, maxValue) {
+	  if (minValue === undefined || minValue === null) minValue = 0;
+	  if (maxValue === undefined || maxValue === null) maxValue = 99;
+
+	  return function predicateFunc(item) {
+		return minValue <= item[fieldName] && item[fieldName] <= maxValue;
+	  };
+	};
+	
+	$scope.byDistanceInKM = function (fieldName, distance) {
+	  return function predicateFunc(item) {
+	  if(distance !== ''){
+	  if(distance.value !== undefined){
+	   if(distance == 'filterDistanceMin') {
+		return ($scope.calculateDistance($scope.loggedInUser.city.lat, $scope.loggedInUser.city.lon,	item[fieldName].lat, item[fieldName].lon) < 30);
+	   }
+	  } else if (distance == 'filterDistanceMin') {
+		return ($scope.calculateDistance($scope.loggedInUser.city.lat, $scope.loggedInUser.city.lon,	item[fieldName].lat, item[fieldName].lon) < 30);
+	  } else if (distance == 'filterDistanceMax') {
+		return ($scope.calculateDistance($scope.loggedInUser.city.lat, $scope.loggedInUser.city.lon,	item[fieldName].lat, item[fieldName].lon) > 300);
+	  }
+	  } else {
+		return item;
+	  }
+	  };
+	};
+	
+	$scope.calculateDistance = function (lat1, lon1, lat2, lon2) {
+		if ((lat1 == lat2) && (lon1 == lon2)) {
+			return 0;
+		}
+		else {
+			var radlat1 = Math.PI * lat1/180;
+			var radlat2 = Math.PI * lat2/180;
+			var theta = lon1-lon2;
+			var radtheta = Math.PI * theta/180;
+			var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+			if (dist > 1) {
+				dist = 1;
+			}
+			dist = Math.acos(dist);
+			dist = dist * 180/Math.PI;
+			dist = dist * 60 * 1.1515;
+			dist = dist * 1.609344;			
+			return parseInt(dist);
+		}
+	}
+});
+</script>
+
+<div ng-app="customerList" ng-controller="filterCtrl">
+<h1> Filters </h1>
+<div class="checkbox">
+  <label> Age Range <input type="number" name="filterAgeMin" ng-model="filterModelMin.age" min="18" max="95"/> 
+  to <input type="number" name="filterAgeMax" ng-model="filterModelMax.age" min="18" max="95"/><br><br></label>
+  <br>
+  <label> Height Range <input type="number" name="filterHeightMin" ng-model="filterHeightMin.height_in_cm" min="135" max="210"/> 
+  to <input type="number" name="filterHeightMax" ng-model="filterHeightMax.height_in_cm" min="135" max="210"/><br><br></label>
+  <br>
+  <label> Compatibility Range <input type="number" name="filterCompatibilityMin" ng-model="filterCompatibilityMin.compatibility_score" min="0" max="99"/> 
+  to <input type="number" name="filterCompatibilityMax" ng-model="filterCompatibilityMax.compatibility_score" min="0" max="99"/><br><br></label>
+  <br>
+  <label> Distance Range in KM.
+  <!--<input type="number" name="filterDistanceMin" ng-model="filterDistanceMin.distance" min="0" max="500"/> 
+  to <input type="number" name="filterDistanceMax" ng-model="filterDistanceMax.distance" min="0" max="500"/>-->
+  <select ng-model="distance">
+            <option name="less than 30km" value="filterDistanceMin">less than 30</option>
+			<option name="greater than 300 km" value="filterDistanceMax">greater than 300</option>
+        </select>
+  <br><br></label>
+  
+  <input type="checkbox" ng-model="hasPhoto" ng-init="hasPhoto = ''">Has Photo</input>
+  <input type="checkbox" ng-model="InContact" ng-init="InContact = ''">Is Contact Exchanged??</input>
+  <input type="checkbox" ng-model="InFavourite" ng-init="InFavourite = ''">Is Favorite??</input>
+  <button ng-click="ResetValue()">Reset Filter</button>
+</div>
+  <table class="table table-striped">
+  <thead>
+    <tr>
+	  <th scope="col">#</th>
+	  <th scope="col">Picture</th>     
+      <th scope="col">Name</th>  
+	  <th scope="col">City</th>
+	  <th scope="col">Age</th>  
+	  <th scope="col">Job</th>  
+	  <th scope="col">Height</th>  
+	  <th scope="col">Compatibility Score</th>  
+	  <th scope="col">Contacts Exchanged</th>  
+	  <th scope="col">Favourite</th>  
+	  <th scope="col">Religion</th>
+	  <th scope="col">distance From User</th>	  
+	    
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="customer in customerData.matches | filter:byRange('age', filterModelMin.age, filterModelMax.age) |
+	filter:byHeightRange('heightInCm', filterHeightMin.height_in_cm, filterHeightMax.height_in_cm) | 
+	filter:byCompatibilityRange('compatibilityScore', filterCompatibilityMin.compatibility_score, filterCompatibilityMax.compatibility_score) | 
+	filter:byDistanceInKM('city', distance) | 
+	filter:byHasPhoto(hasPhoto) | 
+	filter:byContactExachange(InContact) | 
+	filter:byFavorite(InFavourite)">
+		<th scope="row" ng-bind="$index+1"></th>
+	<td><img style="width: 100px; height: 83px;" ng-src="{{customer.mainPhoto}}"></td>
+      <td>{{customer.displayName}}</td>
+	  <td>{{customer.city.name}}</td>
+	  <td>{{customer.age}}</td>
+	  <td>{{customer.jobTitle}}</td>
+	  <td>{{customer.heightInCm}}</td>
+	  <td>{{customer.compatibilityScore}}</td>
+	  <td>{{customer.contactsExchanged}}</td>
+	  <td>{{customer.favourite}}</td>
+	  <td>{{customer.religion}}</td>
+	  <td ng-bind="calculateDistance(loggedInUser.city.lat, loggedInUser.city.lon, customer.city.lat, customer.city.lon)"></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</body>
+</html>
