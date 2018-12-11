@@ -26,7 +26,7 @@ If the path contains spaces, use the shortened path name. For example, C:\Progra
 
 To start the tomcat server traverse to bin folder of tomcat(e.g D:\apache-tomcat-7.0.92-windows-x64\apache-tomcat-7.0.92\bin) in command prompt and run startup.bat 
 The server is up and running (ensure it but hitting http://localhost:8080 in your browser and the home pages of apache tomcat lunches)
-To start the application hit url “http://localhost:8080/FilteringMatches/Home.html” in your browser and the application lunches
+To start the application hit url http://localhost:8080/FilteringMatches/Home.html in your browser and the application lunches
 
 Working of application:
 On initial loading of page list of all 25 people is displayed on selection any of the filter the list gets updated as per filter. 
